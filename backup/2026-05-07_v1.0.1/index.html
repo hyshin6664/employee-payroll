@@ -109,7 +109,7 @@
 
 <header>
   <h1>직원 급여대장</h1>
-  <span class="ver" id="verBtn" title="업데이트 내역">v1.1.0</span>
+  <span class="ver" id="verBtn" title="업데이트 내역">v1.0.1</span>
   <div class="spacer"></div>
   <button id="installBtn" class="install" title="바탕화면 바로가기 만들기">📌 바탕화면에 설치</button>
   <button id="addBtn" class="pri">+ 직원 추가</button>
@@ -142,13 +142,6 @@
       <label>고용보험 요율(%)</label>
       <input type="number" id="rEi" value="0.9" step="0.01" min="0">
     </div>
-    <div class="f">
-      <label>소득세 자동 추정</label>
-      <label style="display:flex;align-items:center;gap:6px;height:32px;cursor:pointer">
-        <input type="checkbox" id="itAuto" checked style="width:16px;height:16px;cursor:pointer">
-        <span style="font-size:13px;color:var(--sub)" id="itAutoLabel">ON (간이세액표 근사)</span>
-      </label>
-    </div>
     <div class="note">
       4대보험 요율은 2025년 근로자 부담 기준 · 장기요양보험은 건강보험료 × %<br>
       국민연금·소득세 등 모든 자동 셀은 클릭해 직접 수정 가능 (한 번 수정한 값은 그 인원의 값으로 고정)
@@ -160,16 +153,14 @@
     <thead>
       <tr>
         <th style="width:32px">#</th>
-        <th style="width:80px">이름</th>
+        <th style="width:90px">이름</th>
         <th style="width:120px">세전급여(원)</th>
-        <th style="width:60px">부양<br>가족수</th>
-        <th style="width:110px">비과세<br><span style="font-weight:400;color:#a78bfa;font-size:10px">팝업으로 항목별</span></th>
-        <th style="width:80px">국민연금</th>
-        <th style="width:80px">건강보험</th>
-        <th style="width:80px">장기요양</th>
-        <th style="width:80px">고용보험</th>
-        <th style="width:90px">소득세<br><span style="font-weight:400;color:#a78bfa;font-size:10px">간이세액표</span></th>
-        <th style="width:80px">지방소득세<br><span style="font-weight:400;color:#a78bfa;font-size:10px">소득세×10%</span></th>
+        <th style="width:90px">국민연금<br><span style="font-weight:400;color:#a78bfa;font-size:10px">직접 수정</span></th>
+        <th style="width:90px">건강보험</th>
+        <th style="width:90px">장기요양</th>
+        <th style="width:90px">고용보험</th>
+        <th style="width:90px">소득세<br><span style="font-weight:400;color:#a78bfa;font-size:10px">직접 입력</span></th>
+        <th style="width:90px">지방소득세<br><span style="font-weight:400;color:#a78bfa;font-size:10px">소득세×10%</span></th>
         <th style="width:100px">공제합계</th>
         <th style="width:120px">실수령액</th>
         <th class="del"></th>
@@ -180,8 +171,6 @@
       <tr>
         <td colspan="2" style="text-align:right;padding-right:10px">합계</td>
         <td class="num" id="sumGross">0</td>
-        <td></td>
-        <td class="num" id="sumExempt">0</td>
         <td class="num" id="sumNps">0</td>
         <td class="num" id="sumHi">0</td>
         <td class="num" id="sumLtc">0</td>
@@ -210,39 +199,6 @@
 
 </div>
 
-<!-- 비과세 항목 팝업 -->
-<div class="modal-bg hide" id="exBg">
-  <div class="modal" style="max-width:480px">
-    <div class="mh">
-      <h3>비과세 항목</h3>
-      <span class="name" id="exName"></span>
-      <button id="exClose">×</button>
-    </div>
-    <div class="mb">
-      <table style="width:100%;border-collapse:collapse;font-size:13px">
-        <tr><td style="padding:8px 4px;color:var(--sub);width:140px">식대 (월 20만 한도)</td>
-          <td><input type="number" id="exMeal" style="width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-variant-numeric:tabular-nums"></td></tr>
-        <tr><td style="padding:8px 4px;color:var(--sub)">자가운전보조금 (월 20만 한도)</td>
-          <td><input type="number" id="exCar" style="width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-variant-numeric:tabular-nums"></td></tr>
-        <tr><td style="padding:8px 4px;color:var(--sub)">출산·보육수당 (자녀당 월 10만)</td>
-          <td><input type="number" id="exBaby" style="width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-variant-numeric:tabular-nums"></td></tr>
-        <tr><td style="padding:8px 4px;color:var(--sub)">연구활동비</td>
-          <td><input type="number" id="exResearch" style="width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-variant-numeric:tabular-nums"></td></tr>
-        <tr><td style="padding:8px 4px;color:var(--sub)">기타 비과세</td>
-          <td><input type="number" id="exEtc" style="width:100%;padding:6px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-variant-numeric:tabular-nums"></td></tr>
-        <tr><td style="padding:12px 4px 4px;font-weight:700">합계</td>
-          <td style="padding:12px 4px 4px;text-align:right;font-weight:700;color:var(--pri);font-variant-numeric:tabular-nums" id="exSum">0 원</td></tr>
-      </table>
-      <div style="font-size:11px;color:var(--sub);margin-top:10px;line-height:1.5">
-        · 비과세 = 소득세 과세표준에서 제외되는 금액. 공제 후 과세표준 = 세전급여 − 비과세<br>
-        · 식대는 회사에서 식사 제공이 없을 때만 비과세. 자가운전은 본인 명의 차량을 업무에 사용할 때.<br>
-        · 4대보험 보수월액 산정 기준에서는 비과세 일부 항목이 다를 수 있습니다 (현재는 세전급여 기준 그대로).
-      </div>
-    </div>
-    <div class="mf"><button id="exDone">완료</button></div>
-  </div>
-</div>
-
 <!-- 업데이트 내역 모달 -->
 <div class="modal-bg hide" id="histBg">
   <div class="modal history">
@@ -259,67 +215,21 @@
 <footer class="credit">CDN &amp; Cloud is by Solbox..</footer>
 
 <script>
-const VER = "v1.1.0";
+const VER = "v1.0.1";
 const UPDATE_HISTORY = [
-  ["v1.1.0","2026-05-07","부양가족수·비과세(개인별 팝업)·소득세 자동 추정(간이세액표 근사) 추가. 비과세 항목별 입력(식대·자가운전·출산보육·연구활동·기타). 메타에 소득세 자동 ON/OFF 토글"],
   ["v1.0.1","2026-05-07","이름 칸 한글 자모 조합 깨지던 문제 수정 (compositionstart/end + 이름 입력 시 재렌더 스킵)"],
   ["v1.0.0","2026-05-07","직원 급여대장 최초 배포 — 세전 입력 시 4대보험·지방소득세 자동, 모든 자동 셀 직접 수정 가능, 엑셀 수식 내장 입출력, A4 인쇄, PWA"]
 ];
 
-// rows: {name, gross, dep, exempt:{meal,car,baby,research,etc}, nps, hi, ltc, ei, it, lit}
-//   gross 만 필수, dep 기본 1, exempt 항목별. 나머지는 빈값="자동", 값 있으면 override
+// rows: {name, gross, nps, hi, ltc, ei, it, lit}
+//   gross 만 필수 입력. 나머지는 빈값="자동", 값 있으면 override
 let rows = [];
-let exemptIndex = -1; // 비과세 모달 편집 대상
 
 const $ = id => document.getElementById(id);
 const fmt = n => (Number(n)||0).toLocaleString("ko-KR");
 const floor10 = n => Math.floor(n/10)*10;
 const pad = n => String(n).padStart(2,"0");
 const todayYM = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}`; };
-
-/* ─────────── 비과세 합계 ─────────── */
-function exemptSum(r){
-  const ex = r.exempt || {};
-  return (Number(ex.meal)||0)+(Number(ex.car)||0)+(Number(ex.baby)||0)+(Number(ex.research)||0)+(Number(ex.etc)||0);
-}
-/* ─────────── 간이세액표 근사 (월 소득세 100% 기준) ─────────── */
-// 입력: 과세표준 월급 (세전 - 비과세), 부양가족수(본인 포함, 8세이상 자녀 미반영)
-// 한국 종합소득세율 + 근로소득공제 + 인적공제 기반 근사 ÷ 12
-// 정확한 값은 국세청 간이세액표 참조. 자동값은 참고용 — 직접 수정 권장.
-function estimateIncomeTax(monthlyTaxable, dep){
-  const m = Math.max(0, Number(monthlyTaxable)||0);
-  const D = Math.max(1, Number(dep)||1);
-  if(m < 1060000) return 0; // 간이세액표 기본 비과세 구간
-  const annual = m * 12;
-  // 근로소득공제
-  let earnedDed;
-  if(annual<=5000000) earnedDed = annual*0.7;
-  else if(annual<=15000000) earnedDed = 3500000+(annual-5000000)*0.4;
-  else if(annual<=45000000) earnedDed = 7500000+(annual-15000000)*0.15;
-  else if(annual<=100000000) earnedDed = 12000000+(annual-45000000)*0.05;
-  else earnedDed = 14750000+(annual-100000000)*0.02;
-  earnedDed = Math.min(earnedDed, 20000000);
-  // 인적공제 (1인당 150만)
-  const personalDed = 1500000 * D;
-  // 표준세액공제 (대략 13만원 / 연)
-  const stdCredit = 130000;
-  let base = annual - earnedDed - personalDed;
-  if(base<=0) return 0;
-  // 종합소득세
-  let tax;
-  if(base<=14000000) tax = base*0.06;
-  else if(base<=50000000) tax = 14000000*0.06 + (base-14000000)*0.15;
-  else if(base<=88000000) tax = 14000000*0.06 + 36000000*0.15 + (base-50000000)*0.24;
-  else if(base<=150000000) tax = 14000000*0.06 + 36000000*0.15 + 38000000*0.24 + (base-88000000)*0.35;
-  else if(base<=300000000) tax = 14000000*0.06 + 36000000*0.15 + 38000000*0.24 + 62000000*0.35 + (base-150000000)*0.38;
-  else if(base<=500000000) tax = 17060000 + 21700000 + (base-300000000)*0.40;
-  else tax = 17060000 + 21700000 + 80000000 + (base-500000000)*0.42;
-  // 근로소득세액공제 (단순화: 산출세액의 55%, 한도 74만)
-  const earnedCredit = Math.min(tax*0.55, 740000);
-  tax = Math.max(0, tax - earnedCredit - stdCredit);
-  // 월 환산, 10원 단위 버림
-  return Math.floor(tax / 12 / 10) * 10;
-}
 
 /* ─────────── 자동 계산 ─────────── */
 function autoVal(r, key){
@@ -328,26 +238,20 @@ function autoVal(r, key){
   const rHi = parseFloat($("rHi").value)||0;
   const rLtc = parseFloat($("rLtc").value)||0;
   const rEi = parseFloat($("rEi").value)||0;
-  const hiAuto = Math.round(g * rHi / 100 / 10) * 10;
+  const hiAuto = Math.round(g * rHi / 100 / 10) * 10; // 10원 단위
   switch(key){
     case "nps": return Math.round(g * rNps / 100 / 10) * 10;
     case "hi":  return hiAuto;
     case "ltc": {
+      // 건강보험 셀의 사용자값 우선해서 장기요양 계산
       const hi = (r.hi!=="" && r.hi!=null && !isNaN(Number(r.hi))) ? Number(r.hi) : hiAuto;
       return Math.round(hi * rLtc / 100 / 10) * 10;
     }
     case "ei":  return Math.round(g * rEi / 100 / 10) * 10;
-    case "it":  {
-      // 메타 토글이 OFF면 자동 0
-      if(!$("itAuto") || !$("itAuto").checked) return 0;
-      const taxable = Math.max(0, g - exemptSum(r));
-      return estimateIncomeTax(taxable, Number(r.dep)||1);
-    }
+    case "it":  return 0; // 소득세는 자동 0 (사용자 입력 권장)
     case "lit": {
-      const it = (r.it!=="" && r.it!=null && !isNaN(Number(r.it))) ? Number(r.it) : autoVal({...r,it:""}, "it");
-      // 장기요양처럼 연쇄 자동: it 자동값을 그대로 사용해서 lit 자동 계산
-      const itEff = (r.it!=="" && r.it!=null && !isNaN(Number(r.it))) ? Number(r.it) : autoVal({...r,it:""},"it");
-      return Math.round(itEff * 0.1 / 10) * 10;
+      const it = (r.it!=="" && r.it!=null && !isNaN(Number(r.it))) ? Number(r.it) : 0;
+      return Math.round(it * 0.1 / 10) * 10;
     }
   }
   return 0;
@@ -387,12 +291,11 @@ function render(){
     fInfo = {i: ae.dataset.i, k: ae.dataset.k, start: ae.selectionStart, end: ae.selectionEnd};
   }
   tbody.innerHTML = "";
-  let sG=0,sN=0,sH=0,sL=0,sE=0,sI=0,sLi=0,sD=0,sNet=0,sEx=0;
+  let sG=0,sN=0,sH=0,sL=0,sE=0,sI=0,sLi=0,sD=0,sNet=0;
 
   rows.forEach((r,i)=>{
     const c = calc(r);
     sG+=c.gross; sN+=c.nps; sH+=c.hi; sL+=c.ltc; sE+=c.ei; sI+=c.it; sLi+=c.lit; sD+=c.ded; sNet+=c.net;
-    sEx += exemptSum(r);
 
     const tr = document.createElement("tr");
     const cellHtml = COLS.map(col=>{
@@ -405,13 +308,10 @@ function render(){
       </td>`;
     }).join("");
 
-    const exSum = exemptSum(r);
     tr.innerHTML = `
       <td>${i+1}</td>
       <td class="name"><input data-k="name" data-i="${i}" value="${r.name||""}" placeholder="이름" style="text-align:center"></td>
       <td><input data-k="gross" data-i="${i}" value="${r.gross||""}" placeholder="3000000" inputmode="numeric"></td>
-      <td><input data-k="dep" data-i="${i}" value="${r.dep||1}" inputmode="numeric" style="text-align:center"></td>
-      <td><button data-ex="${i}" style="font-family:inherit;font-size:12px;padding:6px 8px;border:1px solid ${exSum>0?'#a78bfa':'#e5e7eb'};background:${exSum>0?'#f5f3ff':'#fff'};color:${exSum>0?'#5b21b6':'#94a3b8'};border-radius:6px;cursor:pointer;width:100%;font-weight:${exSum>0?'600':'400'}">📋 ${exSum>0?fmt(exSum):'설정'}</button></td>
       ${cellHtml}
       <td class="num">${fmt(c.ded)}</td>
       <td class="num net">${fmt(c.net)}</td>
@@ -421,7 +321,6 @@ function render(){
   });
 
   $("sumGross").textContent = fmt(sG);
-  $("sumExempt").textContent = fmt(sEx);
   $("sumNps").textContent = fmt(sN);
   $("sumHi").textContent = fmt(sH);
   $("sumLtc").textContent = fmt(sL);
@@ -464,9 +363,6 @@ function render(){
       rows.splice(i,1); render();
     });
   });
-  tbody.querySelectorAll("button[data-ex]").forEach(b=>{
-    b.addEventListener("click", e=>openExempt(+e.currentTarget.dataset.ex));
-  });
 
   if(fInfo){
     const sel = `#tbody input[data-i="${fInfo.i}"][data-k="${fInfo.k}"]`;
@@ -476,8 +372,7 @@ function render(){
 }
 
 function addRow(){
-  rows.push({name:"", gross:"", dep:1, exempt:{meal:200000, car:0, baby:0, research:0, etc:0},
-             nps:"", hi:"", ltc:"", ei:"", it:"", lit:""});
+  rows.push({name:"", gross:"", nps:"", hi:"", ltc:"", ei:"", it:"", lit:""});
   render();
   setTimeout(()=>{
     const inp = document.querySelector('#tbody tr:last-child input[data-k="name"]');
@@ -524,60 +419,51 @@ function exportXlsx(){
   const sTotal = {...sNum, font:{bold:true,sz:11}, fill:{patternType:"solid",fgColor:{rgb:"F5F3FF"}}};
   const sTotalLabel = {...sCell, font:{bold:true}, fill:{patternType:"solid",fgColor:{rgb:"F5F3FF"}}, alignment:{horizontal:"right",vertical:"center"}};
 
-  const header = ["#","이름","세전급여","부양가족수","비과세","국민연금","건강보험","장기요양","고용보험","소득세","지방소득세","공제합계","실수령액"];
+  const header = ["#","이름","세전급여","국민연금","건강보험","장기요양","고용보험","소득세","지방소득세","공제합계","실수령액"];
   setCell(0,1,"급여대장",{s:sTitle});
   const rNps=parseFloat($("rNps").value)||0, rHi=parseFloat($("rHi").value)||0,
         rLtc=parseFloat($("rLtc").value)||0, rEi=parseFloat($("rEi").value)||0;
   setCell(0,2, `지급 연월: ${ym}   ·   국민연금 ${rNps}% / 건강보험 ${rHi}% / 장기요양 ${rLtc}%(건강기준) / 고용보험 ${rEi}%`, {s:sMeta});
   header.forEach((h,c)=> setCell(c, HEADER_ROW, h, {s:sHeader}));
 
-  // 컬럼: A:# B:이름 C:세전 D:부양가족 E:비과세 F:국민연금 G:건강 H:장기 I:고용 J:소득세 K:지방세 L:공제 M:실수령
   rows.forEach((r,i)=>{
     const c = calc(r);
     const xr = HEADER_ROW + 1 + i;
     setCell(0, xr, i+1, {s:sCell});
     setCell(1, xr, r.name||"", {s:sName});
     setCell(2, xr, c.gross, {s:sNum, z:"#,##0"});
-    setCell(3, xr, Number(r.dep)||1, {s:sCell});
-    setCell(4, xr, exemptSum(r), {s:sNum, z:"#,##0"});
+    // D 국민연금: 사용자값이면 값, 자동이면 수식 = ROUND(C/10*요율,0)*10
     const isOv = k => (r[k]!=="" && r[k]!=null && !isNaN(Number(r[k])));
-    setCell(5, xr, c.nps, isOv("nps") ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(C${xr}*${rNps}/100/10,0)*10`, cached:c.nps});
-    setCell(6, xr, c.hi,  isOv("hi")  ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(C${xr}*${rHi}/100/10,0)*10`,  cached:c.hi});
-    setCell(7, xr, c.ltc, isOv("ltc") ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(G${xr}*${rLtc}/100/10,0)*10`, cached:c.ltc});
-    setCell(8, xr, c.ei,  isOv("ei")  ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(C${xr}*${rEi}/100/10,0)*10`,  cached:c.ei});
-    // 소득세는 값(자동이든 수동이든 캐시값). 수식은 너무 복잡해 안 넣음.
-    setCell(9, xr, c.it,  {s:sNum, z:"#,##0"});
-    setCell(10, xr, c.lit, isOv("lit") ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(J${xr}*0.1/10,0)*10`, cached:c.lit});
-    setCell(11, xr, c.ded, {s:sNum, z:"#,##0", f:`SUM(F${xr}:K${xr})`, cached:c.ded});
-    setCell(12, xr, c.net, {s:sNet, z:"#,##0", f:`C${xr}-L${xr}`, cached:c.net});
+    setCell(3, xr, c.nps, isOv("nps") ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(C${xr}*${rNps}/100/10,0)*10`, cached:c.nps});
+    setCell(4, xr, c.hi,  isOv("hi")  ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(C${xr}*${rHi}/100/10,0)*10`,  cached:c.hi});
+    // 장기요양 = 건강보험 × 요율
+    setCell(5, xr, c.ltc, isOv("ltc") ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(E${xr}*${rLtc}/100/10,0)*10`, cached:c.ltc});
+    setCell(6, xr, c.ei,  isOv("ei")  ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(C${xr}*${rEi}/100/10,0)*10`,  cached:c.ei});
+    setCell(7, xr, c.it,  {s:sNum, z:"#,##0"}); // 소득세 항상 값(직접 입력)
+    setCell(8, xr, c.lit, isOv("lit") ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(H${xr}*0.1/10,0)*10`, cached:c.lit});
+    setCell(9, xr, c.ded, {s:sNum, z:"#,##0", f:`SUM(D${xr}:I${xr})`, cached:c.ded});
+    setCell(10, xr, c.net, {s:sNet, z:"#,##0", f:`C${xr}-J${xr}`, cached:c.net});
   });
 
   const totalRow = HEADER_ROW + 1 + rows.length;
   if(rows.length>0){
     setCell(0, totalRow, "", {s:sTotalLabel});
     setCell(1, totalRow, "합계", {s:sTotalLabel});
-    setCell(3, totalRow, "", {s:sTotalLabel});
     const r1 = HEADER_ROW+1, rN = HEADER_ROW+rows.length;
-    // 합계: gross(C), 비과세(E), nps(F), hi(G), ltc(H), ei(I), it(J), lit(K), ded(L), net(M)
-    const sumColAndKey = [
-      [2,"gross"],[4,"_exempt"],[5,"nps"],[6,"hi"],[7,"ltc"],[8,"ei"],[9,"it"],[10,"lit"],[11,"ded"]
-    ];
-    sumColAndKey.forEach(([col,key])=>{
+    const sumKey = {2:"gross",3:"nps",4:"hi",5:"ltc",6:"ei",7:"it",8:"lit",9:"ded"};
+    [2,3,4,5,6,7,8,9].forEach(col=>{
       const L = colLetter(col);
-      const v = key==="_exempt"
-        ? rows.reduce((a,r)=>a+exemptSum(r),0)
-        : rows.reduce((a,r)=>a+calc(r)[key],0);
-      setCell(col, totalRow, v, {s:sTotal, z:"#,##0", f:`SUM(${L}${r1}:${L}${rN})`, cached:undefined});
+      setCell(col, totalRow, rows.reduce((a,r)=>a+calc(r)[sumKey[col]],0), {s:sTotal, z:"#,##0", f:`SUM(${L}${r1}:${L}${rN})`, cached:undefined});
     });
-    setCell(12, totalRow, rows.reduce((a,r)=>a+calc(r).net,0), {s:{...sNet, font:{bold:true,sz:12,color:{rgb:"5B21B6"}}}, z:"#,##0", f:`SUM(M${r1}:M${rN})`, cached:undefined});
+    setCell(10, totalRow, rows.reduce((a,r)=>a+calc(r).net,0), {s:{...sNet, font:{bold:true,sz:12,color:{rgb:"5B21B6"}}}, z:"#,##0", f:`SUM(K${r1}:K${rN})`, cached:undefined});
   }
 
-  ws["!ref"] = `A1:M${totalRow}`;
+  ws["!ref"] = `A1:K${totalRow}`;
   ws["!merges"] = [
-    {s:{r:0,c:0}, e:{r:0,c:12}},
-    {s:{r:1,c:0}, e:{r:1,c:12}}
+    {s:{r:0,c:0}, e:{r:0,c:10}},
+    {s:{r:1,c:0}, e:{r:1,c:10}}
   ];
-  ws["!cols"] = [{wch:5},{wch:12},{wch:14},{wch:8},{wch:12},{wch:12},{wch:12},{wch:12},{wch:12},{wch:13},{wch:13},{wch:14},{wch:15}];
+  ws["!cols"] = [{wch:5},{wch:12},{wch:14},{wch:12},{wch:12},{wch:12},{wch:12},{wch:12},{wch:13},{wch:14},{wch:15}];
   ws["!rows"] = []; ws["!rows"][0] = {hpt:24}; ws["!rows"][HEADER_ROW-1] = {hpt:32};
 
   const wb = XLSX.utils.book_new();
@@ -600,8 +486,8 @@ function importXlsx(file){
       if(hdrIdx<0) throw new Error("헤더 못 찾음");
       const hdr = arr[hdrIdx];
       const idx = name => hdr.findIndex(h => String(h).replace(/\s/g,"")===name);
-      const iName=idx("이름"), iG=idx("세전급여"), iDep=idx("부양가족수"), iEx=idx("비과세"),
-            iN=idx("국민연금"), iH=idx("건강보험"), iL=idx("장기요양"), iE=idx("고용보험"),
+      const iName=idx("이름"), iG=idx("세전급여"), iN=idx("국민연금"),
+            iH=idx("건강보험"), iL=idx("장기요양"), iE=idx("고용보험"),
             iIt=idx("소득세"), iLit=idx("지방소득세");
       const newRows = [];
       for(let i=hdrIdx+1;i<arr.length;i++){
@@ -609,21 +495,20 @@ function importXlsx(file){
         if(!row || row[0]==="") continue;
         if(row.some(c=>String(c)==="합계")) continue;
         if(!row[iName] && !row[iG]) continue;
-        const dep = (iDep>=0 && row[iDep]!=="" && !isNaN(Number(row[iDep]))) ? Number(row[iDep]) : 1;
-        const exTotal = (iEx>=0 && row[iEx]!=="" && !isNaN(Number(row[iEx]))) ? Number(row[iEx]) : 0;
-        // 비과세는 식대 항목으로만 일단 복원 (개별 항목 분해 정보 없음)
-        const r = {name:String(row[iName]||""), gross:String(Number(row[iG])||""), dep,
-                   exempt:{meal:exTotal, car:0, baby:0, research:0, etc:0},
-                   nps:"", hi:"", ltc:"", ei:"", it:"", lit:""};
+        // 자동값과 다르면 override 로 보존
+        const r = {name:String(row[iName]||""), gross:String(Number(row[iG])||""), nps:"", hi:"", ltc:"", ei:"", it:"", lit:""};
+        // 일단 행 만든 후 자동 비교
         const autoR = {...r};
         ["nps","hi","ltc","ei","it","lit"].forEach((k,j)=>{
           const colIdx = [iN,iH,iL,iE,iIt,iLit][j];
           if(colIdx<0) return;
           const v = Number(row[colIdx]);
           if(isNaN(v)) return;
-          if(k==="it"){ r.it = String(v); autoR.it = r.it; return; }
+          // 소득세는 항상 값 보존
+          if(k==="it"){ r.it = String(v); return; }
           const auto = autoVal(autoR, k);
           if(v !== auto) r[k] = String(v);
+          // 단계적으로 r 에 채워가야 ltc/lit 의 hi/it 우선이 맞음
           autoR[k] = r[k];
         });
         newRows.push(r);
@@ -634,39 +519,6 @@ function importXlsx(file){
     }catch(err){ alert("엑셀 불러오기 실패: "+err.message); }
   };
   reader.readAsArrayBuffer(file);
-}
-
-/* ─────────── 비과세 팝업 ─────────── */
-function openExempt(i){
-  exemptIndex = i;
-  const r = rows[i];
-  if(!r.exempt) r.exempt = {meal:0,car:0,baby:0,research:0,etc:0};
-  $("exName").textContent = r.name ? `· ${r.name}` : "";
-  $("exMeal").value = r.exempt.meal||0;
-  $("exCar").value = r.exempt.car||0;
-  $("exBaby").value = r.exempt.baby||0;
-  $("exResearch").value = r.exempt.research||0;
-  $("exEtc").value = r.exempt.etc||0;
-  updateExSum();
-  $("exBg").classList.remove("hide");
-}
-function updateExSum(){
-  const sum = (Number($("exMeal").value)||0)+(Number($("exCar").value)||0)+(Number($("exBaby").value)||0)+(Number($("exResearch").value)||0)+(Number($("exEtc").value)||0);
-  $("exSum").textContent = sum.toLocaleString("ko-KR")+" 원";
-}
-function closeExempt(){
-  if(exemptIndex>=0){
-    rows[exemptIndex].exempt = {
-      meal: Number($("exMeal").value)||0,
-      car: Number($("exCar").value)||0,
-      baby: Number($("exBaby").value)||0,
-      research: Number($("exResearch").value)||0,
-      etc: Number($("exEtc").value)||0
-    };
-  }
-  exemptIndex = -1;
-  $("exBg").classList.add("hide");
-  render();
 }
 
 /* ─────────── 업데이트 내역 모달 ─────────── */
@@ -707,27 +559,6 @@ function init(){
   $("histClose").addEventListener("click", closeHistory);
   $("histDone").addEventListener("click", closeHistory);
   $("histBg").addEventListener("click", e=>{ if(e.target.id==="histBg") closeHistory(); });
-
-  // 비과세 모달
-  $("exClose").addEventListener("click", closeExempt);
-  $("exDone").addEventListener("click", closeExempt);
-  $("exBg").addEventListener("click", e=>{ if(e.target.id==="exBg") closeExempt(); });
-  ["exMeal","exCar","exBaby","exResearch","exEtc"].forEach(id => $(id).addEventListener("input", updateExSum));
-
-  // 소득세 자동 토글
-  try{
-    const saved = localStorage.getItem("payroll_itAuto");
-    if(saved!==null) $("itAuto").checked = (saved==="1");
-  }catch(_){}
-  const updateItAutoLabel = ()=>{
-    $("itAutoLabel").textContent = $("itAuto").checked ? "ON (간이세액표 근사)" : "OFF (직접 입력)";
-  };
-  updateItAutoLabel();
-  $("itAuto").addEventListener("change", ()=>{
-    try{ localStorage.setItem("payroll_itAuto", $("itAuto").checked ? "1":"0"); }catch(_){}
-    updateItAutoLabel();
-    render();
-  });
 
   render();
 }

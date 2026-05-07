@@ -109,7 +109,7 @@
 
 <header>
   <h1>직원 급여대장</h1>
-  <span class="ver" id="verBtn" title="업데이트 내역">v1.1.0</span>
+  <span class="ver" id="verBtn" title="업데이트 내역">v1.2.0</span>
   <div class="spacer"></div>
   <button id="installBtn" class="install" title="바탕화면 바로가기 만들기">📌 바탕화면에 설치</button>
   <button id="addBtn" class="pri">+ 직원 추가</button>
@@ -128,19 +128,26 @@
     </div>
     <div class="f">
       <label>국민연금 요율(%)</label>
-      <input type="number" id="rNps" value="4.5" step="0.01" min="0">
+      <input type="number" id="rNps" value="4.75" step="0.01" min="0">
     </div>
     <div class="f">
       <label>건강보험 요율(%)</label>
-      <input type="number" id="rHi" value="3.545" step="0.001" min="0">
+      <input type="number" id="rHi" value="3.595" step="0.001" min="0">
     </div>
     <div class="f">
       <label>장기요양 요율(%)<br><span style="color:#94a3b8;font-size:10px">건강보험료 기준</span></label>
-      <input type="number" id="rLtc" value="12.95" step="0.01" min="0">
+      <input type="number" id="rLtc" value="13.14" step="0.01" min="0">
     </div>
     <div class="f">
       <label>고용보험 요율(%)</label>
       <input type="number" id="rEi" value="0.9" step="0.01" min="0">
+    </div>
+    <div class="f">
+      <label>국민연금 자동</label>
+      <label style="display:flex;align-items:center;gap:6px;height:32px;cursor:pointer">
+        <input type="checkbox" id="npsAuto" style="width:16px;height:16px;cursor:pointer">
+        <span style="font-size:13px;color:var(--sub)" id="npsAutoLabel">OFF (직접 입력)</span>
+      </label>
     </div>
     <div class="f">
       <label>소득세 자동 추정</label>
@@ -259,8 +266,9 @@
 <footer class="credit">CDN &amp; Cloud is by Solbox..</footer>
 
 <script>
-const VER = "v1.1.0";
+const VER = "v1.2.0";
 const UPDATE_HISTORY = [
+  ["v1.2.0","2026-05-07","요율 디폴트 갱신 (국민연금 4.75 / 건강 3.595 / 장기요양 13.14). 메타에 '국민연금 자동 ON/OFF' 토글 (디폴트 OFF=직접 입력)"],
   ["v1.1.0","2026-05-07","부양가족수·비과세(개인별 팝업)·소득세 자동 추정(간이세액표 근사) 추가. 비과세 항목별 입력(식대·자가운전·출산보육·연구활동·기타). 메타에 소득세 자동 ON/OFF 토글"],
   ["v1.0.1","2026-05-07","이름 칸 한글 자모 조합 깨지던 문제 수정 (compositionstart/end + 이름 입력 시 재렌더 스킵)"],
   ["v1.0.0","2026-05-07","직원 급여대장 최초 배포 — 세전 입력 시 4대보험·지방소득세 자동, 모든 자동 셀 직접 수정 가능, 엑셀 수식 내장 입출력, A4 인쇄, PWA"]
@@ -330,7 +338,11 @@ function autoVal(r, key){
   const rEi = parseFloat($("rEi").value)||0;
   const hiAuto = Math.round(g * rHi / 100 / 10) * 10;
   switch(key){
-    case "nps": return Math.round(g * rNps / 100 / 10) * 10;
+    case "nps": {
+      // 메타 토글이 OFF면 자동 0 (사용자 직접 입력)
+      if(!$("npsAuto") || !$("npsAuto").checked) return 0;
+      return Math.round(g * rNps / 100 / 10) * 10;
+    }
     case "hi":  return hiAuto;
     case "ltc": {
       const hi = (r.hi!=="" && r.hi!=null && !isNaN(Number(r.hi))) ? Number(r.hi) : hiAuto;
@@ -713,6 +725,21 @@ function init(){
   $("exDone").addEventListener("click", closeExempt);
   $("exBg").addEventListener("click", e=>{ if(e.target.id==="exBg") closeExempt(); });
   ["exMeal","exCar","exBaby","exResearch","exEtc"].forEach(id => $(id).addEventListener("input", updateExSum));
+
+  // 국민연금 자동 토글 (디폴트 OFF — 직접 입력)
+  try{
+    const saved = localStorage.getItem("payroll_npsAuto");
+    if(saved!==null) $("npsAuto").checked = (saved==="1");
+  }catch(_){}
+  const updateNpsLabel = ()=>{
+    $("npsAutoLabel").textContent = $("npsAuto").checked ? "ON (세전×요율)" : "OFF (직접 입력)";
+  };
+  updateNpsLabel();
+  $("npsAuto").addEventListener("change", ()=>{
+    try{ localStorage.setItem("payroll_npsAuto", $("npsAuto").checked ? "1":"0"); }catch(_){}
+    updateNpsLabel();
+    render();
+  });
 
   // 소득세 자동 토글
   try{

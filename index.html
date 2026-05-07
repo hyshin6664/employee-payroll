@@ -109,7 +109,7 @@
 
 <header>
   <h1>직원 급여대장</h1>
-  <span class="ver" id="verBtn" title="업데이트 내역">v1.2.0</span>
+  <span class="ver" id="verBtn" title="업데이트 내역">v1.2.1</span>
   <div class="spacer"></div>
   <button id="installBtn" class="install" title="바탕화면 바로가기 만들기">📌 바탕화면에 설치</button>
   <button id="addBtn" class="pri">+ 직원 추가</button>
@@ -266,8 +266,9 @@
 <footer class="credit">CDN &amp; Cloud is by Solbox..</footer>
 
 <script>
-const VER = "v1.2.0";
+const VER = "v1.2.1";
 const UPDATE_HISTORY = [
+  ["v1.2.1","2026-05-07","입력칸 천단위 콤마 표시. 자동 태그 라벨이 메타 요율 따라 동적 변경 (옛 4.5%/3.545% 하드코딩 버그)"],
   ["v1.2.0","2026-05-07","요율 디폴트 갱신 (국민연금 4.75 / 건강 3.595 / 장기요양 13.14). 메타에 '국민연금 자동 ON/OFF' 토글 (디폴트 OFF=직접 입력)"],
   ["v1.1.0","2026-05-07","부양가족수·비과세(개인별 팝업)·소득세 자동 추정(간이세액표 근사) 추가. 비과세 항목별 입력(식대·자가운전·출산보육·연구활동·기타). 메타에 소득세 자동 ON/OFF 토글"],
   ["v1.0.1","2026-05-07","이름 칸 한글 자모 조합 깨지던 문제 수정 (compositionstart/end + 이름 입력 시 재렌더 스킵)"],
@@ -382,14 +383,28 @@ function calc(r){
 }
 
 /* ─────────── 렌더 ─────────── */
-const COLS = [
-  {k:"nps", lbl:"4.5%"},
-  {k:"hi",  lbl:"3.545%"},
-  {k:"ltc", lbl:"건강×%"},
-  {k:"ei",  lbl:"0.9%"},
-  {k:"it",  lbl:"직접"},
-  {k:"lit", lbl:"소득세×10%"}
-];
+function colLabels(){
+  // 메타의 현재 요율 값을 라벨로
+  const nps = parseFloat($("rNps").value)||0;
+  const hi  = parseFloat($("rHi").value)||0;
+  const ltc = parseFloat($("rLtc").value)||0;
+  const ei  = parseFloat($("rEi").value)||0;
+  const npsOn = $("npsAuto") && $("npsAuto").checked;
+  return [
+    {k:"nps", lbl: npsOn ? `${nps}%` : "직접 입력"},
+    {k:"hi",  lbl: `${hi}%`},
+    {k:"ltc", lbl: `건강×${ltc}%`},
+    {k:"ei",  lbl: `${ei}%`},
+    {k:"it",  lbl: "간이세액표"},
+    {k:"lit", lbl: "소득세×10%"}
+  ];
+}
+// 천단위 콤마 표시용
+const fmtInput = v => {
+  const s = String(v||"").replace(/,/g,"").trim();
+  if(s==="" || isNaN(Number(s))) return "";
+  return Number(s).toLocaleString("ko-KR");
+};
 function render(){
   const tbody = $("tbody");
   // 포커스 보존
@@ -407,9 +422,11 @@ function render(){
     sEx += exemptSum(r);
 
     const tr = document.createElement("tr");
-    const cellHtml = COLS.map(col=>{
+    const COLS_DYN = colLabels();
+    const cellHtml = COLS_DYN.map(col=>{
       const isOverride = (r[col.k] !== "" && r[col.k] != null && !isNaN(Number(r[col.k])));
-      const showVal = isOverride ? r[col.k] : autoVal(r, col.k);
+      const rawVal = isOverride ? r[col.k] : autoVal(r, col.k);
+      const showVal = fmtInput(rawVal);
       const isAuto = !isOverride;
       return `<td>
         <input data-k="${col.k}" data-i="${i}" value="${showVal}" inputmode="numeric" ${isAuto?'class="auto"':''}>
@@ -421,7 +438,7 @@ function render(){
     tr.innerHTML = `
       <td>${i+1}</td>
       <td class="name"><input data-k="name" data-i="${i}" value="${r.name||""}" placeholder="이름" style="text-align:center"></td>
-      <td><input data-k="gross" data-i="${i}" value="${r.gross||""}" placeholder="3000000" inputmode="numeric"></td>
+      <td><input data-k="gross" data-i="${i}" value="${fmtInput(r.gross)}" placeholder="3,000,000" inputmode="numeric"></td>
       <td><input data-k="dep" data-i="${i}" value="${r.dep||1}" inputmode="numeric" style="text-align:center"></td>
       <td><button data-ex="${i}" style="font-family:inherit;font-size:12px;padding:6px 8px;border:1px solid ${exSum>0?'#a78bfa':'#e5e7eb'};background:${exSum>0?'#f5f3ff':'#fff'};color:${exSum>0?'#5b21b6':'#94a3b8'};border-radius:6px;cursor:pointer;width:100%;font-weight:${exSum>0?'600':'400'}">📋 ${exSum>0?fmt(exSum):'설정'}</button></td>
       ${cellHtml}
@@ -459,9 +476,8 @@ function render(){
       if(composing) return;
       const i = +e.target.dataset.i, k = e.target.dataset.k;
       let v = e.target.value;
-      if(k!=="name") v = v.replace(/[^\d.]/g,"");
+      if(k!=="name") v = v.replace(/[^\d.]/g,""); // 콤마 등 제거 → raw 숫자
       rows[i][k] = v;
-      // 이름 입력은 재렌더 안 함 (한글 조합·포커스 보존). 다른 행 합계에는 영향 없음.
       if(k!=="name") render();
     });
     if(inp.classList.contains("auto")){
@@ -483,7 +499,19 @@ function render(){
   if(fInfo){
     const sel = `#tbody input[data-i="${fInfo.i}"][data-k="${fInfo.k}"]`;
     const el = document.querySelector(sel);
-    if(el){ el.focus(); try{ el.setSelectionRange(fInfo.start, fInfo.end); }catch(_){} }
+    if(el){
+      el.focus();
+      // 금액 셀(콤마 자동삽입)은 caret 을 끝으로 → 길이 변화 후에도 자연스럽게 이어 입력
+      const moneyKeys = ["gross","nps","hi","ltc","ei","it","lit"];
+      try{
+        if(moneyKeys.includes(fInfo.k)){
+          const len = el.value.length;
+          el.setSelectionRange(len, len);
+        } else {
+          el.setSelectionRange(fInfo.start, fInfo.end);
+        }
+      }catch(_){}
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-const CACHE = 'payroll-v3';
+const CACHE = 'payroll-v4';
 const ASSETS = ['./manifest.json', './icon-192.png', './icon-256.png', './icon-512.png', './simulator.html'];
 
 self.addEventListener('install', (e) => {

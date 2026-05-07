@@ -109,7 +109,7 @@
 
 <header>
   <h1>직원 급여대장</h1>
-  <span class="ver" id="verBtn" title="업데이트 내역">v1.3.0</span>
+  <span class="ver" id="verBtn" title="업데이트 내역">v1.4.0</span>
   <a href="./simulator.html" style="font-family:inherit;font-size:13px;border:1px solid #ddd6fe;background:#faf5ff;color:#5b21b6;padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;font-weight:600">🔄 세후→세전 시뮬</a>
   <div class="spacer"></div>
   <button id="installBtn" class="install" title="바탕화면 바로가기 만들기">📌 바탕화면에 설치</button>
@@ -267,8 +267,9 @@
 <footer class="credit">CDN &amp; Cloud is by Solbox..</footer>
 
 <script>
-const VER = "v1.3.0";
+const VER = "v1.4.0";
 const UPDATE_HISTORY = [
+  ["v1.4.0","2026-05-07","소득세 누진세율 상수 버그 수정 (300M+/500M+ 구간 과소계산). 시뮬레이터 공제 항목 모두 직접 수정 가능"],
   ["v1.3.0","2026-05-07","🔄 세후→세전 시뮬레이터 추가 (별도 페이지). 실수령 입력 → 4대보험·소득세 자동 + 국민연금 직접/자동 선택 → 이진탐색으로 세전 역산"],
   ["v1.2.1","2026-05-07","입력칸 천단위 콤마 표시. 자동 태그 라벨이 메타 요율 따라 동적 변경 (옛 4.5%/3.545% 하드코딩 버그)"],
   ["v1.2.0","2026-05-07","요율 디폴트 갱신 (국민연금 4.75 / 건강 3.595 / 장기요양 13.14). 메타에 '국민연금 자동 ON/OFF' 토글 (디폴트 OFF=직접 입력)"],
@@ -322,9 +323,9 @@ function estimateIncomeTax(monthlyTaxable, dep){
   else if(base<=50000000) tax = 14000000*0.06 + (base-14000000)*0.15;
   else if(base<=88000000) tax = 14000000*0.06 + 36000000*0.15 + (base-50000000)*0.24;
   else if(base<=150000000) tax = 14000000*0.06 + 36000000*0.15 + 38000000*0.24 + (base-88000000)*0.35;
-  else if(base<=300000000) tax = 14000000*0.06 + 36000000*0.15 + 38000000*0.24 + 62000000*0.35 + (base-150000000)*0.38;
-  else if(base<=500000000) tax = 17060000 + 21700000 + (base-300000000)*0.40;
-  else tax = 17060000 + 21700000 + 80000000 + (base-500000000)*0.42;
+  else if(base<=300000000) tax = 37060000 + (base-150000000)*0.38;
+  else if(base<=500000000) tax = 94060000 + (base-300000000)*0.40;
+  else tax = 174060000 + (base-500000000)*0.42;
   // 근로소득세액공제 (단순화: 산출세액의 55%, 한도 74만)
   const earnedCredit = Math.min(tax*0.55, 740000);
   tax = Math.max(0, tax - earnedCredit - stdCredit);

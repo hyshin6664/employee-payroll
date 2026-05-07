@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>세후 → 세전 시뮬레이터</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#7c3aed">
+<link rel="icon" href="./icon-192.png" type="image/png">
+<style>
+  :root{--line:#e5e7eb;--ink:#111827;--sub:#6b7280;--pri:#7c3aed;--bg:#f8fafc}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"맑은 고딕","Malgun Gothic",system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+  header{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:5}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header .ver{font-size:12px;color:#5b21b6;background:#f5f3ff;border-radius:10px;padding:2px 8px}
+  header .spacer{flex:1}
+  header a.back, header button{font-family:inherit;font-size:13px;border:1px solid var(--line);background:#fff;padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;color:var(--ink)}
+  header a.back:hover, header button:hover{background:#f1f5f9}
+
+  .wrap{max-width:980px;margin:24px auto;padding:0 16px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:16px}
+  .panel h2{margin:0 0 14px;font-size:15px;color:#5b21b6;font-weight:700;display:flex;align-items:center;gap:8px}
+
+  .inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+  .f{display:flex;flex-direction:column;gap:5px}
+  .f label{font-size:12px;color:var(--sub)}
+  .f input,.f select{font-family:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-variant-numeric:tabular-nums}
+  .f input[type=number]{text-align:right}
+  .f .row{display:flex;gap:6px;align-items:center}
+  .f .row input{flex:1}
+
+  .npsBox{background:#faf5ff;border:1px solid #ddd6fe;border-radius:8px;padding:12px;margin-top:12px}
+  .npsBox label{display:flex;align-items:center;gap:8px;font-size:13px;color:#5b21b6;cursor:pointer;margin-bottom:8px}
+  .npsBox label input[type=radio]{width:16px;height:16px;cursor:pointer}
+  .npsBox .npsAmt{display:flex;gap:8px;align-items:center;margin-top:8px}
+  .npsBox .npsAmt input{flex:1;font-family:inherit;font-size:13px;padding:6px 8px;border:1px solid var(--line);border-radius:6px;text-align:right;font-variant-numeric:tabular-nums}
+  .npsBox .npsAmt input:disabled{background:#f1f5f9;color:#94a3b8}
+
+  .result{background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border-radius:12px;padding:24px;text-align:center;margin-bottom:16px}
+  .result .lbl{font-size:13px;opacity:.85}
+  .result .gross{font-size:36px;font-weight:800;letter-spacing:-1px;font-variant-numeric:tabular-nums;margin:6px 0}
+  .result .gross.calculating{opacity:.5}
+  .result .sub{font-size:12px;opacity:.85;margin-top:4px}
+
+  .breakdown{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:680px){.breakdown{grid-template-columns:1fr}}
+  .breakdown table{width:100%;border-collapse:collapse;font-size:13px}
+  .breakdown td{padding:8px 6px;border-bottom:1px solid var(--line)}
+  .breakdown td.lbl{color:var(--sub)}
+  .breakdown td.val{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .breakdown tr.sum td{font-weight:700;border-bottom:2px solid var(--pri);padding-top:10px}
+  .breakdown tr.net td{font-weight:700;color:var(--pri);font-size:14px}
+
+  .tip{font-size:12px;color:var(--sub);line-height:1.7;margin-top:12px}
+  footer.credit{text-align:right;padding:16px 22px 24px;color:#94a3b8;font-size:11px}
+</style>
+</head>
+<body>
+
+<header>
+  <a href="./" class="back">← 급여대장</a>
+  <h1>🔄 세후 → 세전 시뮬레이터</h1>
+  <span class="ver">v1.0</span>
+  <div class="spacer"></div>
+</header>
+
+<div class="wrap">
+
+  <div class="panel">
+    <h2>💰 입력</h2>
+    <div class="inputs">
+      <div class="f">
+        <label>희망 실수령액(세후, 원)</label>
+        <input type="number" id="targetNet" value="5000000" step="10000" min="0" inputmode="numeric">
+      </div>
+      <div class="f">
+        <label>부양가족수 (본인 포함)</label>
+        <input type="number" id="dep" value="1" min="1" max="11" step="1">
+      </div>
+      <div class="f">
+        <label>비과세 합계(식대 등, 원)</label>
+        <input type="number" id="exempt" value="200000" step="10000" min="0">
+      </div>
+      <div class="f">
+        <label>국민연금 요율(%)</label>
+        <input type="number" id="rNps" value="4.75" step="0.01" min="0">
+      </div>
+      <div class="f">
+        <label>건강보험 요율(%)</label>
+        <input type="number" id="rHi" value="3.595" step="0.001" min="0">
+      </div>
+      <div class="f">
+        <label>장기요양 요율(%)</label>
+        <input type="number" id="rLtc" value="13.14" step="0.01" min="0">
+      </div>
+      <div class="f">
+        <label>고용보험 요율(%)</label>
+        <input type="number" id="rEi" value="0.9" step="0.01" min="0">
+      </div>
+    </div>
+
+    <div class="npsBox">
+      <div style="font-weight:600;margin-bottom:6px">국민연금 처리</div>
+      <label><input type="radio" name="npsMode" value="manual" checked> 직접 입력 (변동 없는 고정 금액)</label>
+      <label><input type="radio" name="npsMode" value="auto"> 자동 (세전 × 요율로 계산 — 시뮬에 포함)</label>
+      <div class="npsAmt">
+        <span style="font-size:12px;color:var(--sub)">국민연금 금액(원)</span>
+        <input type="number" id="npsManual" value="135000" step="10" min="0">
+      </div>
+    </div>
+  </div>
+
+  <div class="result">
+    <div class="lbl">필요한 세전급여</div>
+    <div class="gross" id="grossOut">-</div>
+    <div class="sub" id="grossSub">목표 실수령 ↑ 와 일치하도록 역산</div>
+  </div>
+
+  <div class="panel">
+    <h2>📋 공제 내역 (시뮬 결과)</h2>
+    <div class="breakdown">
+      <table>
+        <tr><td class="lbl">세전급여</td><td class="val" id="oGross">-</td></tr>
+        <tr><td class="lbl">비과세</td><td class="val" id="oExempt">-</td></tr>
+        <tr><td class="lbl">과세표준</td><td class="val" id="oTaxable">-</td></tr>
+      </table>
+      <table>
+        <tr><td class="lbl">국민연금</td><td class="val" id="oNps">-</td></tr>
+        <tr><td class="lbl">건강보험</td><td class="val" id="oHi">-</td></tr>
+        <tr><td class="lbl">장기요양</td><td class="val" id="oLtc">-</td></tr>
+        <tr><td class="lbl">고용보험</td><td class="val" id="oEi">-</td></tr>
+        <tr><td class="lbl">소득세</td><td class="val" id="oIt">-</td></tr>
+        <tr><td class="lbl">지방소득세</td><td class="val" id="oLit">-</td></tr>
+        <tr class="sum"><td class="lbl">공제합계</td><td class="val" id="oDed">-</td></tr>
+        <tr class="net"><td class="lbl">실수령(세후)</td><td class="val" id="oNet">-</td></tr>
+      </table>
+    </div>
+    <div class="tip">
+      · 이진탐색으로 세전급여를 구하므로 1원 단위 오차 가능 (결과는 100원 단위 반올림).<br>
+      · 소득세는 간이세액표 근사 (근로소득공제+인적공제+종합소득세율). 정확값은 국세청 표 참조.<br>
+      · 국민연금 '직접 입력' 모드면 그 금액이 고정 — 세전이 변해도 국민연금은 그대로.<br>
+      · 4대보험·세금 모두 같은 직원_급여대장 계산식 그대로.
+    </div>
+  </div>
+
+</div>
+
+<footer class="credit">CDN &amp; Cloud is by Solbox..</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = n => Math.round(n).toLocaleString("ko-KR");
+const floor10 = n => Math.floor(n/10)*10;
+
+function estimateIncomeTax(monthlyTaxable, dep){
+  const m = Math.max(0, Number(monthlyTaxable)||0);
+  const D = Math.max(1, Number(dep)||1);
+  if(m < 1060000) return 0;
+  const annual = m * 12;
+  let earnedDed;
+  if(annual<=5000000) earnedDed = annual*0.7;
+  else if(annual<=15000000) earnedDed = 3500000+(annual-5000000)*0.4;
+  else if(annual<=45000000) earnedDed = 7500000+(annual-15000000)*0.15;
+  else if(annual<=100000000) earnedDed = 12000000+(annual-45000000)*0.05;
+  else earnedDed = 14750000+(annual-100000000)*0.02;
+  earnedDed = Math.min(earnedDed, 20000000);
+  const personalDed = 1500000 * D;
+  const stdCredit = 130000;
+  let base = annual - earnedDed - personalDed;
+  if(base<=0) return 0;
+  let tax;
+  if(base<=14000000) tax = base*0.06;
+  else if(base<=50000000) tax = 14000000*0.06 + (base-14000000)*0.15;
+  else if(base<=88000000) tax = 14000000*0.06 + 36000000*0.15 + (base-50000000)*0.24;
+  else if(base<=150000000) tax = 14000000*0.06 + 36000000*0.15 + 38000000*0.24 + (base-88000000)*0.35;
+  else if(base<=300000000) tax = 14000000*0.06 + 36000000*0.15 + 38000000*0.24 + 62000000*0.35 + (base-150000000)*0.38;
+  else if(base<=500000000) tax = 17060000 + 21700000 + (base-300000000)*0.40;
+  else tax = 17060000 + 21700000 + 80000000 + (base-500000000)*0.42;
+  const earnedCredit = Math.min(tax*0.55, 740000);
+  tax = Math.max(0, tax - earnedCredit - stdCredit);
+  return Math.floor(tax / 12 / 10) * 10;
+}
+
+function simulate(gross){
+  const dep = Number($("dep").value)||1;
+  const exempt = Number($("exempt").value)||0;
+  const rNps = parseFloat($("rNps").value)||0;
+  const rHi = parseFloat($("rHi").value)||0;
+  const rLtc = parseFloat($("rLtc").value)||0;
+  const rEi = parseFloat($("rEi").value)||0;
+  const npsMode = document.querySelector('input[name=npsMode]:checked').value;
+  const npsManual = Number($("npsManual").value)||0;
+  const taxable = Math.max(0, gross - exempt);
+
+  const nps = npsMode==="manual" ? npsManual : Math.round(gross * rNps / 100 / 10) * 10;
+  const hi = Math.round(gross * rHi / 100 / 10) * 10;
+  const ltc = Math.round(hi * rLtc / 100 / 10) * 10;
+  const ei = Math.round(gross * rEi / 100 / 10) * 10;
+  const it = estimateIncomeTax(taxable, dep);
+  const lit = Math.round(it * 0.1 / 10) * 10;
+  const ded = nps + hi + ltc + ei + it + lit;
+  const net = gross - ded;
+  return {gross, nps, hi, ltc, ei, it, lit, ded, net, taxable, exempt};
+}
+
+function reverseGross(targetNet){
+  let lo = targetNet;
+  let hi = targetNet * 2.5; // 공제율 60% 까지 커버
+  for(let i=0; i<80; i++){
+    const mid = (lo+hi)/2;
+    const r = simulate(mid);
+    if(r.net < targetNet) lo = mid;
+    else if(r.net > targetNet) hi = mid;
+    else break;
+    if(hi-lo < 1) break;
+  }
+  // 100원 단위 반올림 후 결과 검증
+  const grossRounded = Math.round((lo+hi)/2 / 100) * 100;
+  return grossRounded;
+}
+
+function recalc(){
+  const target = Number($("targetNet").value)||0;
+  if(target<=0){
+    $("grossOut").textContent = "-";
+    return;
+  }
+  // 국민연금 manual 모드일 때 npsManual input 활성/비활성
+  const npsMode = document.querySelector('input[name=npsMode]:checked').value;
+  $("npsManual").disabled = (npsMode==="auto");
+
+  const gross = reverseGross(target);
+  const r = simulate(gross);
+  $("grossOut").textContent = fmt(gross);
+  $("grossSub").textContent = `시뮬 실수령 ${fmt(r.net)}원 ${r.net===target?'= 목표 일치':`(목표 ${fmt(target)} 와 차이 ${fmt(r.net-target)})`}`;
+  $("oGross").textContent = fmt(gross);
+  $("oExempt").textContent = "− " + fmt(r.exempt);
+  $("oTaxable").textContent = fmt(r.taxable);
+  $("oNps").textContent = "− " + fmt(r.nps);
+  $("oHi").textContent = "− " + fmt(r.hi);
+  $("oLtc").textContent = "− " + fmt(r.ltc);
+  $("oEi").textContent = "− " + fmt(r.ei);
+  $("oIt").textContent = "− " + fmt(r.it);
+  $("oLit").textContent = "− " + fmt(r.lit);
+  $("oDed").textContent = "− " + fmt(r.ded);
+  $("oNet").textContent = fmt(r.net);
+}
+
+// 모든 input/radio 변경 시 재계산
+document.querySelectorAll("input").forEach(inp=>{
+  inp.addEventListener("input", recalc);
+  inp.addEventListener("change", recalc);
+});
+
+recalc();
+</script>
+</body>
+</html>

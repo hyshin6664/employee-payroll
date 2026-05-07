@@ -109,7 +109,8 @@
 
 <header>
   <h1>직원 급여대장</h1>
-  <span class="ver" id="verBtn" title="업데이트 내역">v1.2.1</span>
+  <span class="ver" id="verBtn" title="업데이트 내역">v1.3.0</span>
+  <a href="./simulator.html" style="font-family:inherit;font-size:13px;border:1px solid #ddd6fe;background:#faf5ff;color:#5b21b6;padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;font-weight:600">🔄 세후→세전 시뮬</a>
   <div class="spacer"></div>
   <button id="installBtn" class="install" title="바탕화면 바로가기 만들기">📌 바탕화면에 설치</button>
   <button id="addBtn" class="pri">+ 직원 추가</button>
@@ -266,8 +267,9 @@
 <footer class="credit">CDN &amp; Cloud is by Solbox..</footer>
 
 <script>
-const VER = "v1.2.1";
+const VER = "v1.3.0";
 const UPDATE_HISTORY = [
+  ["v1.3.0","2026-05-07","🔄 세후→세전 시뮬레이터 추가 (별도 페이지). 실수령 입력 → 4대보험·소득세 자동 + 국민연금 직접/자동 선택 → 이진탐색으로 세전 역산"],
   ["v1.2.1","2026-05-07","입력칸 천단위 콤마 표시. 자동 태그 라벨이 메타 요율 따라 동적 변경 (옛 4.5%/3.545% 하드코딩 버그)"],
   ["v1.2.0","2026-05-07","요율 디폴트 갱신 (국민연금 4.75 / 건강 3.595 / 장기요양 13.14). 메타에 '국민연금 자동 ON/OFF' 토글 (디폴트 OFF=직접 입력)"],
   ["v1.1.0","2026-05-07","부양가족수·비과세(개인별 팝업)·소득세 자동 추정(간이세액표 근사) 추가. 비과세 항목별 입력(식대·자가운전·출산보육·연구활동·기타). 메타에 소득세 자동 ON/OFF 토글"],

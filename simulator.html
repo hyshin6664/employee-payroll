@@ -64,7 +64,7 @@
 <header>
   <a href="./" class="back">← 급여대장</a>
   <h1>🔄 세후 → 세전 시뮬레이터</h1>
-  <span class="ver">v1.2</span>
+  <span class="ver">v1.3</span>
   <div class="spacer"></div>
 </header>
 
@@ -75,7 +75,7 @@
     <div class="inputs">
       <div class="f">
         <label>희망 실수령액(세후, 원)</label>
-        <input type="number" id="targetNet" value="5000000" step="10000" min="0" inputmode="numeric">
+        <input type="text" id="targetNet" value="5,000,000" inputmode="numeric">
       </div>
       <div class="f">
         <label>부양가족수 (본인 포함)</label>
@@ -87,7 +87,7 @@
       </div>
       <div class="f">
         <label>비과세 합계(식대 등, 원)</label>
-        <input type="number" id="exempt" value="200000" step="10000" min="0">
+        <input type="text" id="exempt" value="200,000" inputmode="numeric">
       </div>
       <div class="f">
         <label>국민연금 요율(%)</label>
@@ -111,16 +111,6 @@
       <a href="https://teht.hometax.go.kr/websquare/websquare.html?w2xPath=/ui/sf/a/a/UTESFAAF99.xml" target="_blank" style="font-size:12px;color:#5b21b6;text-decoration:underline">📋 국세청 간이세액표 자동계산 →</a>
       <button id="applyBtn" style="font-family:inherit;font-size:14px;background:#7c3aed;color:#fff;border:none;padding:10px 22px;border-radius:8px;cursor:pointer;font-weight:700">📊 적용</button>
     </div>
-
-    <div class="npsBox">
-      <div style="font-weight:600;margin-bottom:6px">국민연금 처리</div>
-      <label><input type="radio" name="npsMode" value="manual" checked> 직접 입력 (변동 없는 고정 금액)</label>
-      <label><input type="radio" name="npsMode" value="auto"> 자동 (세전 × 요율로 계산 — 시뮬에 포함)</label>
-      <div class="npsAmt">
-        <span style="font-size:12px;color:var(--sub)">국민연금 금액(원)</span>
-        <input type="number" id="npsManual" value="135000" step="10" min="0">
-      </div>
-    </div>
   </div>
 
   <div class="result">
@@ -138,17 +128,18 @@
         <tr><td class="lbl">과세표준</td><td class="val" id="oTaxable">-</td></tr>
       </table>
       <table>
-        <tr><td class="lbl">국민연금<br><span style="font-size:10px;color:#a78bfa">위 박스에서 설정</span></td><td class="val" id="oNps">-</td></tr>
+        <tr><td class="lbl">국민연금 <span class="tag" data-d="nps"></span></td>
+          <td class="val"><input type="text" data-d="nps" placeholder="자동(세전×요율)" inputmode="numeric" style="width:130px;text-align:right;font-variant-numeric:tabular-nums;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;font-size:13px"></td></tr>
         <tr><td class="lbl">건강보험 <span class="tag" data-d="hi"></span></td>
-          <td class="val"><input type="number" data-d="hi" placeholder="자동" style="width:120px;text-align:right;font-variant-numeric:tabular-nums;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;font-size:13px"></td></tr>
+          <td class="val"><input type="text" data-d="hi" placeholder="자동" inputmode="numeric" style="width:130px;text-align:right;font-variant-numeric:tabular-nums;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;font-size:13px"></td></tr>
         <tr><td class="lbl">장기요양 <span class="tag" data-d="ltc"></span></td>
-          <td class="val"><input type="number" data-d="ltc" placeholder="자동" style="width:120px;text-align:right;font-variant-numeric:tabular-nums;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;font-size:13px"></td></tr>
+          <td class="val"><input type="text" data-d="ltc" placeholder="자동" inputmode="numeric" style="width:130px;text-align:right;font-variant-numeric:tabular-nums;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;font-size:13px"></td></tr>
         <tr><td class="lbl">고용보험 <span class="tag" data-d="ei"></span></td>
-          <td class="val"><input type="number" data-d="ei" placeholder="자동" style="width:120px;text-align:right;font-variant-numeric:tabular-nums;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;font-size:13px"></td></tr>
+          <td class="val"><input type="text" data-d="ei" placeholder="자동" inputmode="numeric" style="width:130px;text-align:right;font-variant-numeric:tabular-nums;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;font-size:13px"></td></tr>
         <tr><td class="lbl">소득세 <span class="tag" data-d="it"></span></td>
-          <td class="val"><input type="number" data-d="it" placeholder="자동(간이세액표)" style="width:120px;text-align:right;font-variant-numeric:tabular-nums;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;font-size:13px"></td></tr>
+          <td class="val"><input type="text" data-d="it" placeholder="자동(간이세액표)" inputmode="numeric" style="width:130px;text-align:right;font-variant-numeric:tabular-nums;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;font-size:13px"></td></tr>
         <tr><td class="lbl">지방소득세 <span class="tag" data-d="lit"></span></td>
-          <td class="val"><input type="number" data-d="lit" placeholder="소득세×10%" style="width:120px;text-align:right;font-variant-numeric:tabular-nums;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;font-size:13px"></td></tr>
+          <td class="val"><input type="text" data-d="lit" placeholder="소득세×10%" inputmode="numeric" style="width:130px;text-align:right;font-variant-numeric:tabular-nums;padding:4px 6px;border:1px solid #e2e8f0;border-radius:5px;font-family:inherit;font-size:13px"></td></tr>
         <tr class="sum"><td class="lbl">공제합계</td><td class="val" id="oDed">-</td></tr>
         <tr class="net"><td class="lbl">실수령(세후)</td><td class="val" id="oNet">-</td></tr>
       </table>
@@ -213,32 +204,38 @@ function estimateIncomeTax(monthlyTaxable, dep, kids){
 }
 
 // 공제 항목별 사용자 override (빈 문자열이면 자동)
-const overrides = {hi:"", ltc:"", ei:"", it:"", lit:""};
+const overrides = {nps:"", hi:"", ltc:"", ei:"", it:"", lit:""};
 
 function getOverride(k){
-  const v = overrides[k];
-  if(v==="" || v==null || isNaN(Number(v))) return null;
+  const v = String(overrides[k]||"").replace(/,/g,"");
+  if(v==="" || isNaN(Number(v))) return null;
   return Number(v);
 }
 
+// 천단위 콤마 포맷
+const fmtComma = v => {
+  const s = String(v||"").replace(/,/g,"").trim();
+  if(s==="" || isNaN(Number(s))) return "";
+  return Number(s).toLocaleString("ko-KR");
+};
+
 function simulate(gross){
   const dep = Number($("dep").value)||1;
-  const exempt = Number($("exempt").value)||0;
+  const kids = Number($("kids").value)||0;
+  const exempt = Number(String($("exempt").value).replace(/,/g,""))||0;
   const rNps = parseFloat($("rNps").value)||0;
   const rHi = parseFloat($("rHi").value)||0;
   const rLtc = parseFloat($("rLtc").value)||0;
   const rEi = parseFloat($("rEi").value)||0;
-  const npsMode = document.querySelector('input[name=npsMode]:checked').value;
-  const npsManual = Number($("npsManual").value)||0;
   const taxable = Math.max(0, gross - exempt);
 
-  const nps = npsMode==="manual" ? npsManual : Math.round(gross * rNps / 100 / 10) * 10;
+  const npsAuto = Math.round(gross * rNps / 100 / 10) * 10;
+  const nps = getOverride("nps") ?? npsAuto;
   const hiAuto = Math.round(gross * rHi / 100 / 10) * 10;
   const hi  = getOverride("hi")  ?? hiAuto;
   const ltcBase = getOverride("hi") ?? hiAuto;
   const ltc = getOverride("ltc") ?? Math.round(ltcBase * rLtc / 100 / 10) * 10;
   const ei  = getOverride("ei")  ?? Math.round(gross * rEi / 100 / 10) * 10;
-  const kids = Number($("kids").value)||0;
   const itAuto = estimateIncomeTax(taxable, dep, kids);
   const it  = getOverride("it")  ?? itAuto;
   const lit = getOverride("lit") ?? Math.round(it * 0.1 / 10) * 10;
@@ -249,7 +246,7 @@ function simulate(gross){
 
 function reverseGross(targetNet){
   let lo = targetNet;
-  let hi = targetNet * 2.5; // 공제율 60% 까지 커버
+  let hi = targetNet * 3; // 고소득 + override 케이스 커버
   for(let i=0; i<80; i++){
     const mid = (lo+hi)/2;
     const r = simulate(mid);
@@ -264,15 +261,11 @@ function reverseGross(targetNet){
 }
 
 function recalc(){
-  const target = Number($("targetNet").value)||0;
+  const target = Number(String($("targetNet").value).replace(/,/g,""))||0;
   if(target<=0){
     $("grossOut").textContent = "-";
     return;
   }
-  // 국민연금 manual 모드일 때 npsManual input 활성/비활성
-  const npsMode = document.querySelector('input[name=npsMode]:checked').value;
-  $("npsManual").disabled = (npsMode==="auto");
-
   const gross = reverseGross(target);
   const r = simulate(gross);
   $("grossOut").textContent = fmt(gross);
@@ -280,15 +273,14 @@ function recalc(){
   $("oGross").textContent = fmt(gross);
   $("oExempt").textContent = "− " + fmt(r.exempt);
   $("oTaxable").textContent = fmt(r.taxable);
-  $("oNps").textContent = "− " + fmt(r.nps);
-  // 공제 input 칸: 사용자 override 가 있으면 그 값, 없으면 자동값. focus 중이면 건드리지 않기.
-  ["hi","ltc","ei","it","lit"].forEach(k=>{
+  // 모든 공제 input 동일 처리 (국민연금 포함)
+  ["nps","hi","ltc","ei","it","lit"].forEach(k=>{
     const inp = document.querySelector(`input[data-d="${k}"]`);
     const tag = document.querySelector(`.tag[data-d="${k}"]`);
     const ov = getOverride(k);
     const isOver = ov!==null;
     if(document.activeElement !== inp){
-      inp.value = isOver ? overrides[k] : r[k];
+      inp.value = fmtComma(isOver ? overrides[k].toString().replace(/,/g,"") : r[k]);
     }
     tag.className = "tag " + (isOver?"edit":"auto");
     tag.textContent = isOver ? "수정됨" : "자동";
@@ -297,8 +289,19 @@ function recalc(){
   $("oNet").textContent = fmt(r.net);
 }
 
-// 메타/요율 변경: 자동 재계산 X — '적용' 버튼 클릭 시에만 반영
-// (대신 변경 표시: 적용 버튼 강조)
+// 콤마 자동 삽입(text input) + caret 끝으로
+function attachCommaFormat(inp){
+  inp.addEventListener("input", e=>{
+    const raw = e.target.value.replace(/[^\d]/g,"");
+    e.target.value = raw==="" ? "" : Number(raw).toLocaleString("ko-KR");
+    // caret 끝으로
+    try{ const len = e.target.value.length; e.target.setSelectionRange(len, len); }catch(_){}
+  });
+}
+// 메타: 큰 금액(targetNet, exempt) 콤마 포맷
+["targetNet","exempt"].forEach(id=>attachCommaFormat(document.getElementById(id)));
+
+// 메타/요율 변경 → 적용 버튼 강조 (자동 재계산 X)
 function markPending(){
   const btn = document.getElementById("applyBtn");
   btn.style.background = "#dc2626"; btn.textContent = "📊 적용 (변경됨)";
@@ -308,24 +311,27 @@ document.querySelectorAll("input:not([data-d])").forEach(inp=>{
   inp.addEventListener("change", markPending);
 });
 document.getElementById("applyBtn").addEventListener("click", ()=>{
-  // 메타 변경을 적용 → 공제 override 도 자동값으로 갱신 (사용자가 명시적으로 "다시 자동 기준" 으로 시작)
-  ["hi","ltc","ei","it","lit"].forEach(k=>{ overrides[k]=""; });
+  ["nps","hi","ltc","ei","it","lit"].forEach(k=>{ overrides[k]=""; });
   document.querySelectorAll("input[data-d]").forEach(i=>{ i.value=""; });
   recalc();
   const btn = document.getElementById("applyBtn");
   btn.style.background = "#7c3aed"; btn.textContent = "📊 적용";
 });
-// 공제 항목 input: 즉시 반영 (override 갱신)
+// 공제 항목 input: 콤마 자동 + override 갱신 + 즉시 재계산
 document.querySelectorAll("input[data-d]").forEach(inp=>{
   inp.addEventListener("input", e=>{
     const k = e.target.dataset.d;
-    overrides[k] = e.target.value;
+    const raw = e.target.value.replace(/[^\d]/g,"");
+    e.target.value = raw==="" ? "" : Number(raw).toLocaleString("ko-KR");
+    try{ const len = e.target.value.length; e.target.setSelectionRange(len, len); }catch(_){}
+    overrides[k] = raw;
     recalc();
   });
+  inp.addEventListener("focus", ()=>{ try{ inp.select(); }catch(_){} });
 });
 // 전체 자동 리셋
 document.getElementById("resetOverride").addEventListener("click", ()=>{
-  ["hi","ltc","ei","it","lit"].forEach(k=>{ overrides[k]=""; });
+  ["nps","hi","ltc","ei","it","lit"].forEach(k=>{ overrides[k]=""; });
   document.querySelectorAll("input[data-d]").forEach(i=>{ i.value=""; });
   recalc();
 });

@@ -109,7 +109,7 @@
 
 <header>
   <h1>직원 급여대장</h1>
-  <span class="ver" id="verBtn" title="업데이트 내역">v1.5.0</span>
+  <span class="ver" id="verBtn" title="업데이트 내역">v1.6.0</span>
   <a href="./simulator.html" style="font-family:inherit;font-size:13px;border:1px solid #ddd6fe;background:#faf5ff;color:#5b21b6;padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;font-weight:600">🔄 세후→세전 시뮬</a>
   <div class="spacer"></div>
   <button id="installBtn" class="install" title="바탕화면 바로가기 만들기">📌 바탕화면에 설치</button>
@@ -267,8 +267,9 @@
 <footer class="credit">CDN &amp; Cloud is by Solbox..</footer>
 
 <script>
-const VER = "v1.5.0";
+const VER = "v1.6.0";
 const UPDATE_HISTORY = [
+  ["v1.6.0","2026-05-07","시뮬레이터: 국민연금도 다른 공제처럼 아래 표에서 직접 수정. 모든 금액 입력칸 천단위 콤마"],
   ["v1.5.0","2026-05-07","시뮬레이터: 2단계 입력 (요율·부양가족 변경 후 '📊 적용' 버튼 클릭으로 반영). 8~20세 자녀공제 적용. 국세청 간이세액표 자동계산 링크 추가"],
   ["v1.4.0","2026-05-07","소득세 누진세율 상수 버그 수정 (300M+/500M+ 구간 과소계산). 시뮬레이터 공제 항목 모두 직접 수정 가능"],
   ["v1.3.0","2026-05-07","🔄 세후→세전 시뮬레이터 추가 (별도 페이지). 실수령 입력 → 4대보험·소득세 자동 + 국민연금 직접/자동 선택 → 이진탐색으로 세전 역산"],

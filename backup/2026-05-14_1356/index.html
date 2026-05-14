@@ -109,7 +109,7 @@
 
 <header>
   <h1>직원 급여대장</h1>
-  <span class="ver" id="verBtn" title="업데이트 내역">v1.7.0</span>
+  <span class="ver" id="verBtn" title="업데이트 내역">v1.6.0</span>
   <a href="./simulator.html" style="font-family:inherit;font-size:13px;border:1px solid #ddd6fe;background:#faf5ff;color:#5b21b6;padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;font-weight:600">🔄 세후→세전 시뮬</a>
   <div class="spacer"></div>
   <button id="installBtn" class="install" title="바탕화면 바로가기 만들기">📌 바탕화면에 설치</button>
@@ -211,7 +211,7 @@
 
   <div class="tip">
     · <b>세전급여</b>를 입력하면 4대보험·지방소득세가 자동 계산됩니다. 모든 자동 셀은 클릭하면 전체선택되어 곧바로 새 값으로 덮어쓸 수 있어요. 비우면 다시 자동값으로 돌아갑니다.<br>
-    · <b>국민연금</b>은 급여 변동 시 즉시 반영되지 않는 경우가 많아 직접 입력 필드입니다. 자동값(세전 × 요율, 단 <b>상한 보수월액 적용</b>: ~2026.06 6,370,000원 / 2026.07~ 6,590,000원)이 회색으로 보이지만, 매월 같은 값을 유지하려면 한 번 입력해두면 그 값으로 고정.<br>
+    · <b>국민연금</b>은 급여 변동 시 즉시 반영되지 않는 경우가 많아 직접 입력 필드입니다. 자동값(세전 × 요율)이 회색으로 보이지만, 매월 같은 값을 유지하려면 한 번 입력해두면 그 값으로 고정.<br>
     · <b>소득세</b>는 국세청 간이세액표를 보고 직접 입력 (부양가족수·과세표준에 따라 다름). 지방소득세는 소득세 × 10% 자동.<br>
     · 엑셀 다운로드 → 다시 불러오기로 같은 명단 복원. 엑셀 안에는 수식이 들어있어 셀 값 바꾸면 합계도 자동 갱신.
   </div>
@@ -267,9 +267,8 @@
 <footer class="credit">CDN &amp; Cloud is by Solbox..</footer>
 
 <script>
-const VER = "v1.7.0";
+const VER = "v1.6.0";
 const UPDATE_HISTORY = [
-  ["v1.7.0","2026-05-14","국민연금 상한 보수월액 적용 (~2026.06: 6,370,000원 / 2026.07~: 6,590,000원). 세전이 상한 초과해도 국민연금은 상한액×요율로 자동 계산. 엑셀 수식도 MIN() 반영"],
   ["v1.6.0","2026-05-07","시뮬레이터: 국민연금도 다른 공제처럼 아래 표에서 직접 수정. 모든 금액 입력칸 천단위 콤마"],
   ["v1.5.0","2026-05-07","시뮬레이터: 2단계 입력 (요율·부양가족 변경 후 '📊 적용' 버튼 클릭으로 반영). 8~20세 자녀공제 적용. 국세청 간이세액표 자동계산 링크 추가"],
   ["v1.4.0","2026-05-07","소득세 누진세율 상수 버그 수정 (300M+/500M+ 구간 과소계산). 시뮬레이터 공제 항목 모두 직접 수정 가능"],
@@ -289,11 +288,6 @@ let exemptIndex = -1; // 비과세 모달 편집 대상
 const $ = id => document.getElementById(id);
 const fmt = n => (Number(n)||0).toLocaleString("ko-KR");
 const floor10 = n => Math.floor(n/10)*10;
-// 국민연금 상한 보수월액 (지급연월 기준, YYYY-MM)
-function npsCap(ym){
-  if(!ym) ym = (new Date()).toISOString().slice(0,7);
-  return ym >= "2026-07" ? 6590000 : 6370000;
-}
 const pad = n => String(n).padStart(2,"0");
 const todayYM = () => { const d=new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}`; };
 
@@ -353,9 +347,7 @@ function autoVal(r, key){
     case "nps": {
       // 메타 토글이 OFF면 자동 0 (사용자 직접 입력)
       if(!$("npsAuto") || !$("npsAuto").checked) return 0;
-      const base = Math.min(g, npsCap($("ym") && $("ym").value));
-      // 국민연금은 10원 단위 절사 (공단 표준)
-      return Math.floor(base * rNps / 100 / 10) * 10;
+      return Math.round(g * rNps / 100 / 10) * 10;
     }
     case "hi":  return hiAuto;
     case "ltc": {
@@ -594,7 +586,7 @@ function exportXlsx(){
     setCell(3, xr, Number(r.dep)||1, {s:sCell});
     setCell(4, xr, exemptSum(r), {s:sNum, z:"#,##0"});
     const isOv = k => (r[k]!=="" && r[k]!=null && !isNaN(Number(r[k])));
-    setCell(5, xr, c.nps, isOv("nps") ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUNDDOWN(MIN(C${xr},${npsCap(ym)})*${rNps}/100/10,0)*10`, cached:c.nps});
+    setCell(5, xr, c.nps, isOv("nps") ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(C${xr}*${rNps}/100/10,0)*10`, cached:c.nps});
     setCell(6, xr, c.hi,  isOv("hi")  ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(C${xr}*${rHi}/100/10,0)*10`,  cached:c.hi});
     setCell(7, xr, c.ltc, isOv("ltc") ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(G${xr}*${rLtc}/100/10,0)*10`, cached:c.ltc});
     setCell(8, xr, c.ei,  isOv("ei")  ? {s:sNum, z:"#,##0"} : {s:sNum, z:"#,##0", f:`ROUND(C${xr}*${rEi}/100/10,0)*10`,  cached:c.ei});
